@@ -81,6 +81,8 @@ public class NiftyDispatcher extends SimpleChannelUpstreamHandler
         // responses.
         final int responseSequenceId = dispatcherSequenceId.incrementAndGet();
 
+        NiftyContext.setRemoteAddress(ctx.getChannel().getRemoteAddress());
+
         // Limit the number of pending responses (responses which finished out of order, and are
         // waiting for previous requests to be finished so they can be written in order), by
         // blocking further channel reads. Due to the way Netty frame decoders work, this is more
