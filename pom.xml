@@ -22,12 +22,12 @@ limitations under the License.
     <parent>
         <groupId>com.facebook</groupId>
         <artifactId>facebook-oss-pom</artifactId>
-        <version>1</version>
+        <version>4</version>
     </parent>
 
     <groupId>com.facebook.nifty</groupId>
     <artifactId>nifty-parent</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -36,7 +36,7 @@ limitations under the License.
         <module>nifty-examples</module>
         <module>nifty-load-tester</module>
     </modules>
-    
+
     <properties>
         <!-- Nifty actually can not build with the 1.6 compiler because -->
         <!-- it dependends on airlift, which is 1.7 only.               -->
@@ -45,7 +45,7 @@ limitations under the License.
         <fb.check.fail-pmd>false</fb.check.fail-pmd>
         <fb.check.fail-findbugs>false</fb.check.fail-findbugs>
 
-        <dep.airlift.version>0.66</dep.airlift.version>
+        <dep.airlift.version>0.68</dep.airlift.version>
     </properties>
 
     <url>https://facebook.github.com/nifty</url>
@@ -104,25 +104,25 @@ limitations under the License.
             <dependency>
                 <groupId>org.apache.thrift</groupId>
                 <artifactId>libthrift</artifactId>
-                <version>0.8.0</version>
+                <version>0.9.0</version>
             </dependency>
 
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty</artifactId>
-                <version>3.5.2.Final</version>
+                <version>3.6.1.Final</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.1.2</version>
+                <version>4.2.2</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
-                <version>4.1.4</version>
+                <version>4.2.3</version>
             </dependency>
 
             <dependency>
@@ -136,14 +136,6 @@ limitations under the License.
                 <artifactId>bootstrap</artifactId>
                 <version>${dep.airlift.version}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpcore</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpclient</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>com.google.code.findbugs</groupId>
                         <artifactId>jsr305</artifactId>
@@ -177,5 +169,17 @@ limitations under the License.
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <configuration>
+                    <properties>
+                        <inceptionYear>${project.inceptionYear}</inceptionYear>
+                        <year>2013</year>
+                    </properties>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

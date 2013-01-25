@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ public class ThriftUnframedDecoder extends FrameDecoder {
 
         try
         {
-            TNiftyTransport transport = new TNiftyTransport(channel, buffer);
+            TNiftyTransport transport = new TNiftyTransport(channel,
+                                                            buffer,
+                                                            ThriftTransportType.UNFRAMED);
             TBinaryProtocol protocol = new TBinaryProtocol(transport);
 
             protocol.readMessageBegin();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class TNiftyClientTransport extends TNiftyAsyncClientTransport
         long timeRemaining = (long)timeout.convertTo(TimeUnit.NANOSECONDS);
         lock.lock();
         try {
-            while (true) {
+            while (!closed) {
                 int bytesAvailable = readBuffer.readableBytes();
                 if (bytesAvailable > 0) {
                     int begin = readBuffer.readerIndex();
@@ -129,9 +129,6 @@ public class TNiftyClientTransport extends TNiftyAsyncClientTransport
                     break;
                 }
                 timeRemaining = condition.awaitNanos(timeRemaining);
-                if (closed) {
-                    throw new TTransportException("channel closed !");
-                }
                 if (exception != null) {
                     try {
                         throw new TTransportException(exception);
@@ -142,6 +139,9 @@ public class TNiftyClientTransport extends TNiftyAsyncClientTransport
                         close();
                     }
                 }
+            }
+            if (closed) {
+                throw new TTransportException("channel closed !");
             }
         }
         finally {

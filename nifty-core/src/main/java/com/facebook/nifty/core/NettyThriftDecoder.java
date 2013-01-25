@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.facebook.nifty.core;
 
+import org.apache.thrift.protocol.TMessageType;
 import org.apache.thrift.transport.TTransport;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -44,6 +45,12 @@ public class NettyThriftDecoder extends OneToOneDecoder
 
     protected TTransport getTransport(Channel channel, ChannelBuffer cb)
     {
-        return new TNiftyTransport(channel, cb);
+        ThriftTransportType type = (cb.getUnsignedByte(0) < 0x80) ?
+                ThriftTransportType.FRAMED :
+                ThriftTransportType.UNFRAMED;
+        if (type == ThriftTransportType.FRAMED) {
+            cb.skipBytes(4);
+        }
+        return new TNiftyTransport(channel, cb, type);
     }
 }

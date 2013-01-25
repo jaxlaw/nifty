@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class TestNiftyClient
                     {
                         bind().toInstance(new ThriftServerDefBuilder()
                                 .listen(port)
-                                .withProcessor(new scribe.Processor(new scribe.Iface()
+                                .withProcessor(new scribe.Processor<>(new scribe.Iface()
                                 {
                                     @Override
                                     public ResultCode Log(List<LogEntry> messages)

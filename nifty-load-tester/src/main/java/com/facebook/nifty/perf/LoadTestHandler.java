@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,18 @@ public class LoadTestHandler implements LoadTest.Iface {
   public void onewaySend(ByteBuffer data) {
   }
 
-  public void onewayThrow(int code) throws TException {
-    throw new TException();
+  public void onewayThrow(int code) {
+    // Because this is a one-way throw, it isn't declared in the thrift
+    // IDL, and doesn't appear on the throws declaration of the generated
+    // handler interface. Thus, this method must throw an unchecked exception.
+    throw new Error();
   }
 
-  public void throwUnexpected(int code) throws TException {
-    throw new TException();
+  public void throwUnexpected(int code) {
+    // Because this is an unexpected throw, it isn't declared in the thrift
+    // IDL, and doesn't appear on the throws declaration of the generated
+    // handler interface. Thus, this method must throw an unchecked exception.
+    throw new Error();
   }
 
   public void throwError(int code) throws LoadError {
@@ -97,7 +103,7 @@ public class LoadTestHandler implements LoadTest.Iface {
   }
 
   private void burnImpl(long microseconds) {
-    long end = System.nanoTime() + microseconds;
+    long end = System.nanoTime() + microseconds * 1000;
     while (System.nanoTime() < end) {}
   }
 }

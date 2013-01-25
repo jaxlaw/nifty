@@ -15,21 +15,16 @@
  */
 package com.facebook.nifty.client;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.util.Timer;
 
-public interface TNiftyClientListener
-{
-    /**
-     * Called when a full frame as defined in TFramedTransport is available.
-     *
-     * @param channel the channel
-     * @param buffer the payload of the frame, without the leading 4-bytes length header
-     */
-    void onFrameRead(Channel channel, ChannelBuffer buffer);
+public interface NiftyClientConnector<T extends NiftyClientChannel> {
+    ChannelFuture connect(ClientBootstrap bootstrap);
 
-    void onChannelClosedOrDisconnected(Channel channel);
+    T newThriftClientChannel(Channel channel, Timer timer);
 
-    void onExceptionEvent(ExceptionEvent e);
+    ChannelPipelineFactory newChannelPipelineFactory(int maxFrameSize);
 }

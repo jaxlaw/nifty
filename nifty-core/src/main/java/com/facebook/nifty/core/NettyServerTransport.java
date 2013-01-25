@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Facebook, Inc.
+ * Copyright (C) 2012-2013 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
+import org.jboss.netty.handler.timeout.IdleStateHandler;
+import org.jboss.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A core channel the decode framed Thrift message, dispatches to the TProcessor given
@@ -44,6 +45,8 @@ public class NettyServerTransport
 
     private final int port;
     private final ChannelPipelineFactory pipelineFactory;
+    private static final int NO_WRITER_IDLE_TIMEOUT = 0;
+    private static final int NO_ALL_IDLE_TIMEOUT = 0;
     private ServerBootstrap bootstrap;
     private Channel serverChannel;
     private final ThriftServerDef def;
@@ -53,7 +56,8 @@ public class NettyServerTransport
     public NettyServerTransport(
             final ThriftServerDef def,
             NettyConfigBuilder configBuilder,
-            final ChannelGroup allChannels)
+            final ChannelGroup allChannels,
+            final Timer timer)
     {
         this.def = def;
         this.configBuilder = configBuilder;
@@ -70,9 +74,18 @@ public class NettyServerTransport
                 {
                     ChannelPipeline cp = Channels.pipeline();
                     cp.addLast(ChannelStatistics.NAME, new ChannelStatistics(allChannels));
-                    cp.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(def.getMaxFrameSize(), 0, 4, 0, 4));
-                    cp.addLast("thriftDecoder", new NettyThriftDecoder());
-                    cp.addLast("frameEncoder", new LengthFieldPrepender(4));
+                    cp.addLast("frameDecoder", new ThriftFrameDecoder(def.getMaxFrameSize(),
+                                                                      def.getInProtocolFactory()));
+                    if (def.getClientIdleTimeout() != null) {
+                        // Add handlers to detect idle client connections and disconnect them
+                        cp.addLast("idleTimeoutHandler", new IdleStateHandler(timer,
+                                                                              (int)def.getClientIdleTimeout().toMillis(),
+                                                                              NO_WRITER_IDLE_TIMEOUT,
+                                                                              NO_ALL_IDLE_TIMEOUT,
+                                                                              TimeUnit.MILLISECONDS
+                                                                              ));
+                        cp.addLast("idleDisconnectHandler", new IdleDisconnectHandler());
+                    }
                     cp.addLast("dispatcher", new NiftyDispatcher(def));
                     return cp;
                 }
@@ -114,5 +127,9 @@ public class NettyServerTransport
             latch.await();
             serverChannel = null;
         }
+    }
+
+    public Channel getServerChannel() {
+        return serverChannel;
     }
 }
